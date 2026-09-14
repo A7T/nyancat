@@ -1,0 +1,25 @@
+{
+  "name": "nyan10chan",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sprites": "node tools/export-sprites.mjs",
+    "predev": "npm run sprites",
+    "dev": "vite --host 127.0.0.1",
+    "prebuild": "npm run sprites",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --test tests/scene.test.mjs",
+    "test:browser": "playwright test"
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/addon-webgl": "0.19.0",
+    "@xterm/xterm": "6.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "vite": "8.3.0"
+  }
+}

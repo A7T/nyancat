@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0a101b" />
+  <meta name="description" content="歼10娘阅兵拉烟，运行在浏览器终端里的像素动画。原作：无残弹的钢坦克。" />
+  <title>nyan10chan</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23003969'/%3E%3Cpath d='M4 11h16v3H4z' fill='%23ff1e2c'/%3E%3Cpath d='M4 14h16v3H4z' fill='%23ffed30'/%3E%3Cpath d='M4 17h16v3H4z' fill='%233fed22'/%3E%3Cpath d='M4 20h16v3H4z' fill='%237139f9'/%3E%3Cpath d='m28 9-8 14v-8l-6-2z' fill='white'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <main class="workspace">
+    <div id="terminal" aria-label="nyan10chan 终端" aria-describedby="key-hints"></div>
+    <p id="key-hints" class="sr-only">空格暂停或继续，R 重播，F 全屏，Ctrl-C 返回命令行。触屏轻点动画可暂停或继续。</p>
+    <span id="status" class="sr-only" role="status"></span>
+    <footer><a href="https://www.bilibili.com/opus/1111297816944181257" target="_blank" rel="noreferrer">无残弹的钢坦克</a><span aria-hidden="true">|</span><a href="https://github.com/klange/nyancat" target="_blank" rel="noreferrer">K Lange</a><span aria-hidden="true">|</span><a href="https://github.com/A7T/nyancat" target="_blank" rel="noreferrer">A7T</a></footer>
+    <noscript>请启用 JavaScript 以运行终端。</noscript>
+  </main>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

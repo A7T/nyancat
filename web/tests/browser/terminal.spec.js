@@ -1,0 +1,46 @@
+import { test, expect } from '@playwright/test';
+const terminalText=page=>page.evaluate(()=>{
+  const b=window.__j10Terminal.buffer.active;
+  return Array.from({length:b.length},(_,i)=>b.getLine(i)?.translateToString(true)??'').join('\n');
+});
+test('minimal page, keyboard playback, renamed CLI and mobile layout',async({page})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.goto('/');
+  await expect(page.locator('#terminal')).toHaveAttribute('data-playing','true');
+  await expect(page.locator('footer a')).toHaveCount(3);
+  await expect(page.getByRole('link',{name:'无残弹的钢坦克'})).toHaveAttribute('href','https://www.bilibili.com/opus/1111297816944181257');
+  await expect(page.getByRole('link',{name:'A7T'})).toHaveAttribute('href','https://github.com/A7T/nyancat');
+  await expect(page.getByRole('link',{name:'K Lange'})).toHaveAttribute('href','https://github.com/klange/nyancat');
+  await expect(page.locator('button,select,header')).toHaveCount(0);
+  await page.keyboard.press('Space');
+  await expect(page.locator('#terminal')).toHaveAttribute('data-playing','false');
+  const frame=await page.locator('#terminal').getAttribute('data-frame');
+  await page.waitForTimeout(220);
+  await expect(page.locator('#terminal')).toHaveAttribute('data-frame',frame);
+  await page.screenshot({path:'test-results/desktop.png',fullPage:true});
+  await page.keyboard.press('r');
+  await expect(page.locator('#terminal')).toHaveAttribute('data-playing','true');
+  await page.keyboard.press('Control+c');
+  await expect(page.locator('#terminal')).toHaveAttribute('data-mode','shell');
+  await page.keyboard.type('help');await page.keyboard.press('Enter');
+  await expect.poll(()=>terminalText(page)).toContain('nyan10chan');
+  await page.keyboard.type('nyan10chan -f 0');await page.keyboard.press('Enter');
+  await expect.poll(()=>terminalText(page)).toContain('参数无效');
+  await page.keyboard.type('nyan10chan --256 -f 3 -d 20');await page.keyboard.press('Enter');
+  await expect.poll(()=>terminalText(page)).toContain('Completed 3 frames.');
+  await page.keyboard.type('credits');await page.keyboard.press('Enter');
+  await expect.poll(()=>terminalText(page)).toContain('原作：无残弹的钢坦克');
+  await page.screenshot({path:'test-results/shell.png',fullPage:true});
+  await page.keyboard.type('nyan10chan');await page.keyboard.press('Enter');
+  await page.keyboard.press('Space');
+  await page.setViewportSize({width:390,height:844});
+  await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:'test-results/mobile.png',fullPage:true});
+  expect(errors).toEqual([]);
+});
+test('reduced motion starts paused and touch resumes',async({page})=>{
+  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');
+  await expect(page.locator('#terminal')).toHaveAttribute('data-playing','false');
+  await page.locator('#terminal').dispatchEvent('pointerup',{pointerType:'touch'});
+  await expect(page.locator('#terminal')).toHaveAttribute('data-playing','true');
+});

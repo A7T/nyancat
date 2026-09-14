@@ -1,3 +1,14 @@
 nyancat
 *.o
 *.pyc
+nyan10chan
+.venv/
+__pycache__/
+*.dSYM/
+web/node_modules/
+web/dist/
+web/test-results/
+web/playwright-report/
+web/src/sprites.json
+web/public/LICENSE.txt
+web/public/THIRD-PARTY.txt

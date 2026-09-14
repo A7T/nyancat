@@ -19,6 +19,9 @@ $(distdir): FORCE
 	cp src/nyancat.c $(distdir)/src
 	cp src/animation.c $(distdir)/src
 	cp src/telnet.h $(distdir)/src
+	cp src/nyan10chan.c src/nyan10chan_sprites.h $(distdir)/src
+	cp README.md $(distdir)
+	cp -R assets tools $(distdir)
 
 FORCE:
 	-rm $(distdir).tar.gz >/dev/null 2>&1
