@@ -9,7 +9,7 @@ all: nyancat nyan10chan
 
 nyancat.o: animation.c telnet.h
 
-nyan10chan: nyan10chan.c nyan10chan_sprites.h
+nyan10chan: nyan10chan.c nyan10chan_sprites.h nyan10chan_colors.h nyan10chan_telnet.h telnet.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) nyan10chan.c -o $@
 
 nyancat: $(OBJECTS)
@@ -20,5 +20,6 @@ clean:
 
 check: all
 	python3 ../tools/smoke_test.py
+	python3 ../tools/telnet_test.py
 
 .PHONY: all clean check

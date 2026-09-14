@@ -28,6 +28,8 @@ test('minimal page, keyboard playback, renamed CLI and mobile layout',async({pag
   await expect.poll(()=>terminalText(page)).toContain('参数无效');
   await page.keyboard.type('nyan10chan --256 -f 3 -d 20');await page.keyboard.press('Enter');
   await expect.poll(()=>terminalText(page)).toContain('Completed 3 frames.');
+  await page.keyboard.type('nyan10chan --16 -f 4 -d 20');await page.keyboard.press('Enter');
+  await expect.poll(()=>terminalText(page)).toContain('Completed 4 frames.');
   await page.keyboard.type('credits');await page.keyboard.press('Enter');
   await expect.poll(()=>terminalText(page)).toContain('原作：无残弹的钢坦克');
   await page.screenshot({path:'test-results/shell.png',fullPage:true});

@@ -1,0 +1,21 @@
+services:
+  nyan10chan:
+    build: .
+    image: nyan10chan:local
+    container_name: nyan10chan
+    restart: unless-stopped
+    init: true
+    ports:
+      - "2323:2323"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 80
+    mem_limit: 64m
+    cpus: 1.0
+    logging:
+      driver: json-file
+      options:
+        max-size: "1m"
+        max-file: "2"

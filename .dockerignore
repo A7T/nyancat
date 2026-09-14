@@ -1,0 +1,14 @@
+*
+!src/
+src/*
+!src/Makefile
+!src/nyan10chan.c
+!src/nyan10chan_sprites.h
+!src/nyan10chan_colors.h
+!src/nyan10chan_telnet.h
+!src/telnet.h
+!tools/
+tools/*
+!tools/serve-telnet.sh
+!README.md
+!src/nyancat.c

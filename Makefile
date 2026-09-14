@@ -20,6 +20,8 @@ $(distdir): FORCE
 	cp src/animation.c $(distdir)/src
 	cp src/telnet.h $(distdir)/src
 	cp src/nyan10chan.c src/nyan10chan_sprites.h $(distdir)/src
+	cp src/nyan10chan_telnet.h src/nyan10chan_colors.h $(distdir)/src
+	cp Dockerfile compose.yaml .dockerignore $(distdir)
 	cp README.md $(distdir)
 	cp -R assets tools $(distdir)
 

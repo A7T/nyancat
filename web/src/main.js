@@ -46,7 +46,7 @@ function draw() {
   busy=true;dirty=false;
   const frame=tick;
   if(frame!==countedTick) {shown++;countedTick=frame;}
-  const output=(clear?'\x1b[0m\x1b[2J':'')+toAnsi(scene(frame),terminal.cols,terminal.rows,mode256);
+  const output=(clear?'\x1b[0m\x1b[2J':'')+toAnsi(scene(frame),terminal.cols,terminal.rows,mode256,frame);
   clear=false;
   terminal.write(output,()=>{busy=false;});
   $('terminal').dataset.frame=String(frame);
@@ -85,7 +85,7 @@ function execute(command) {
   const parts=command.trim().split(/\s+/),name=parts.shift();
   if(!name) return;
   if(name==='help') {
-    terminal.writeln('nyan10chan [--256] [-f N] [-d MS]  播放动画');
+    terminal.writeln('nyan10chan [--256 | --16] [-f N] [-d MS]  播放动画');
     terminal.writeln('credits                         原作与许可');
     terminal.writeln('clear                           清屏');
     terminal.writeln('动画中：Space 暂停，R 重播，Ctrl-C / Q 返回命令行。');
@@ -101,8 +101,10 @@ function execute(command) {
     let frames=0,ms=90,color256=false;
     for(let i=0;i<parts.length;i++) {
       if(parts[i]==='--256') color256=true;
+      else if(parts[i]==='--16') color256=16;
+      else if(parts[i]==='--truecolor') color256=false;
       else if(parts[i]==='--help' || parts[i]==='-h') {
-        terminal.writeln('nyan10chan [--256] [-f 1..10000000] [-d 1..10000]');return;
+        terminal.writeln('nyan10chan [--256 | --16] [-f 1..10000000] [-d 1..10000]');return;
       } else if(['-f','--frames','-d','--delay'].includes(parts[i])) {
         const frameOption=['-f','--frames'].includes(parts[i]);
         const value=parts[++i],n=Number(value);

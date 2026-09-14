@@ -1,3 +1,5 @@
+import colorSpec from './colors.json' with { type: 'json' };
+const { colors:terminalColors, wingRegions, wingMaterials, wingAccents, wingInks, ansi16:ansiPalette }=colorSpec;
 // Port of src/nyan10chan.c; covered by byte-for-byte C/JS frame comparisons.
 export const WIDTH = 160, HEIGHT = 100;
 export const POSES = [0,0,1,1,4,4,5,5,0,1,4,5,0,1,4,5,0,1,2,3,2,0,4,5];
@@ -36,7 +38,8 @@ export function createScene({palette, sprites}) {
     return pixels;
   };
 }
-const cache=new Map();
+const cache=new Map(terminalColors.map(([r,g,b,index]) => [(r<<16)|(g<<8)|b,index]));
+const ansi16=new Map(terminalColors.map(([r,g,b,,index]) => [(r<<16)|(g<<8)|b,index]));
 function nearest256(r,g,b) {
   const key=(r<<16)|(g<<8)|b;
   if(cache.has(key)) return cache.get(key);
@@ -50,7 +53,36 @@ function nearest256(r,g,b) {
   }
   cache.set(key,best);return best;
 }
-export function toAnsi(pixels, columns, rows, mode256=false) {
+const rgbKey=([r,g,b])=>(r<<16)|(g<<8)|b;
+const wingMaterialRgb=new Set(wingMaterials.map(i=>rgbKey(terminalColors[i])));
+const wingAccentByPosition=new Map(wingAccents.map(([x,y,ink])=>[y*80+x,ink]));
+function terminalColor(rgb,mode,sx,sy) {
+  const mode16=mode===16 || mode==='16',key=rgbKey(rgb);
+  if(mode16 && wingMaterialRgb.has(key) && wingRegions.some(([x0,y0,x1,y1])=>sx>=x0 && sx<=x1 && sy>=y0 && sy<=y1)) {
+    const ink=wingAccentByPosition.get(sy*80+sx) ?? 0;
+    return wingInks[ink];
+  }
+  return mode16?(ansi16.get(key) ?? 0):mode?nearest256(...rgb):key;
+}
+function colorRgb(key,mode) {
+  if(!mode) return [key>>16,(key>>8)&255,key&255];
+  if(key<16) return ansiPalette[key];
+  if(key>=232) return Array(3).fill(8+10*(key-232));
+  const ramp=[0,95,135,175,215,255],n=key-16;
+  return [ramp[Math.floor(n/36)],ramp[Math.floor(n/6)%6],ramp[n%6]];
+}
+// Full-size reference raster, using the same final palette and sparse accents as ANSI.
+export function toRgb(pixels,mode=false,tick=0) {
+  const output=new Uint8Array(pixels.length),originY=9+BOB[tick%8];
+  for(let y=0;y<HEIGHT;y++) for(let x=0;x<WIDTH;x++) {
+    const offset=(y*WIDTH+x)*3,sx=x-66,sy=y-originY;
+    const key=terminalColor(pixels.subarray(offset,offset+3),mode,sx,sy);
+    output.set(colorRgb(key,mode),offset);
+  }
+  return output;
+}
+export function toAnsi(pixels, columns, rows, mode256=false,tick=0) {
+  const mode16=mode256===16 || mode256==='16';
   // Match the native renderer's aspect, sampling and centering.
   let w=columns,h=Math.floor(w*HEIGHT/WIDTH);
   if(h>(rows-1)*2) { h=(rows-1)*2;w=Math.floor(h*WIDTH/HEIGHT); }
@@ -58,18 +90,21 @@ export function toAnsi(pixels, columns, rows, mode256=false) {
   if(w>WIDTH) {w=WIDTH;h=HEIGHT;}
   const left=Math.floor((columns-w)/2),top=Math.floor((rows-Math.floor(h/2))/2);
   let out='\x1b[?25l',lastFg=-1,lastBg=-1;
-  const escape=(offset,foreground) => {
-    const [r,g,b]=pixels.subarray(offset,offset+3), key=(r<<16)|(g<<8)|b;
+  const originY=9+BOB[tick%8];
+  const escape=(sx,sy,foreground) => {
+    const offset=(sy*WIDTH+sx)*3;
+    const key=terminalColor(pixels.subarray(offset,offset+3),mode256,sx-66,sy-originY);
     if(key===(foreground?lastFg:lastBg)) return '';
     if(foreground) lastFg=key;else lastBg=key;
-    return mode256?`\x1b[${foreground?38:48};5;${nearest256(r,g,b)}m`:
-      `\x1b[${foreground?38:48};2;${r};${g};${b}m`;
+    if(mode16) return `\x1b[${(key<8?30+key:90+key-8)+(foreground?0:10)}m`;
+    return mode256?`\x1b[${foreground?38:48};5;${key}m`:
+      `\x1b[${foreground?38:48};2;${key>>16};${(key>>8)&255};${key&255}m`;
   };
   for(let y=0;y<Math.floor(h/2);y++) {
     out+=`\x1b[${top+y+1};${left+1}H`;
     for(let x=0;x<w;x++) {
       const sx=Math.floor(x*WIDTH/w),sy=Math.floor(y*2*HEIGHT/h),by=Math.floor((y*2+1)*HEIGHT/h);
-      out+=escape((sy*WIDTH+sx)*3,true)+escape((by*WIDTH+sx)*3,false)+'▀';
+      out+=escape(sx,sy,true)+escape(sx,by,false)+'▀';
     }
   }
   return out+'\x1b[0m';
